@@ -1,0 +1,35 @@
+- name: Create project directory
+  file:
+    path: "{{ project_root }}"
+    state: directory
+
+- name: Copy Docker Compose files
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: "{{ project_root }}/docker-compose.yml"
+
+- name: Create the traefik directory
+  ansible.builtin.file:
+    path: /opt/devops_project/traefik
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create the acme.json file
+  ansible.builtin.file:
+    path: /opt/devops_project/traefik/acme.json
+    state: touch
+    owner: root
+    group: root
+    mode: '0600'  # For security, the acme.json file should be restricted
+
+- name: Pull Docker images
+  ansible.builtin.command:
+    cmd: docker-compose pull
+    chdir: "{{ project_root }}"
+
+- name: Start application services
+  ansible.builtin.command:
+    cmd: docker-compose up -d
+    chdir: "{{ project_root }}"
